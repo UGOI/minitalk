@@ -6,11 +6,12 @@
 /*   By: sdukic <sdukic@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:54:38 by sdukic            #+#    #+#             */
-/*   Updated: 2022/11/09 17:00:03 by sdukic           ###   ########.fr       */
+/*   Updated: 2022/11/10 15:05:43 by sdukic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_H
 # define MINITALK_H
 # include<stdio.h>
+# include <unistd.h>
 #endif
