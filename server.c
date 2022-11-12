@@ -6,7 +6,7 @@
 /*   By: sdukic <sdukic@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:52:00 by sdukic            #+#    #+#             */
-/*   Updated: 2022/11/12 21:21:19 by sdukic           ###   ########.fr       */
+/*   Updated: 2022/11/13 00:41:44 by sdukic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,21 @@
 #include "libft/libft.h"
 #include <signal.h>
 
-static volatile int signalPid = -1;
+void	recive_ack(char *c, int pid)
+{
+	static int	end;
 
-void	handle_bin(int bin)
+	if (*c)
+		end = 1;
+	else
+	{
+		if (end == 1)
+			kill(pid, SIGUSR2);
+		end = 0;
+	}
+}
+
+void	handle_bin(int bin, int pid)
 {
 	static unsigned int	bits;
 	static char			c;
@@ -28,44 +40,41 @@ void	handle_bin(int bin)
 		c += 1;
 	if (bits == 7)
 	{
-		ft_printf("%c", c);
+		write(1, &c, 1);
+		recive_ack(&c, pid);
 		c = 0;
 		bits = 0;
-		kill(signalPid, SIGUSR1);
+		kill(pid, SIGUSR1);
 	}
 	else
-	{
 		bits++;
-	}
 }
 
 void	handle_sig(int signal, siginfo_t *info, void *context)
 {
-	signalPid = info->si_pid;
 	(void)(context);
-
 	if (signal == SIGUSR1)
 	{
-		handle_bin(1);
+		handle_bin(1, info->si_pid);
 	}
 	if (signal == SIGUSR2)
 	{
-		handle_bin(0);
+		handle_bin(0, info->si_pid);
 	}
 }
 
 int	main(void)
 {
-	struct sigaction sa = { 0 };
-	int	pid;
+	struct sigaction sa;
+	int		pid;
 
 	pid = getpid();
 	sa.sa_sigaction = &handle_sig;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
 	ft_printf("ServerID: %d\n", pid);
 	while (1)
-	{
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGUSR2, &sa, NULL);
-	}
+		pause();
 	return (0);
 }

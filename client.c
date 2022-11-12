@@ -6,7 +6,7 @@
 /*   By: sdukic <sdukic@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:39:39 by sdukic            #+#    #+#             */
-/*   Updated: 2022/11/12 21:48:46 by sdukic           ###   ########.fr       */
+/*   Updated: 2022/11/13 00:39:44 by sdukic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,39 +16,50 @@
 
 int	g_ack;
 
-void	handle_sig(int signal, siginfo_t *info, void *context)
+void	handle_sig(int signal)
 {
-	(void)(info);
-	(void)(context);
 	if (signal == SIGUSR1)
 	{
 		g_ack = 1;
+	}
+	else if (signal == SIGUSR2)
+		ft_printf("Message Received!\n");
+}
+
+void	send_zero(int serverid)
+{
+	while (!g_ack)
+	{
+		kill(serverid, SIGUSR2);
+		usleep(100);
 	}
 }
 
 void	send_message(int serverid, char *message)
 {
-	int				sig;
-	unsigned int	shift;
-	struct sigaction sa = { 0 };
+	int					sig;
+	unsigned int		shift;
 
-	sa.sa_sigaction = &handle_sig;
-	while (!g_ack)
-	{
-		sigaction(SIGUSR1, &sa, NULL);
-		kill(serverid, SIGUSR2);
-		usleep(200);
-	}
+	send_zero(serverid);
 	while (*message)
 	{
 		shift = 8;
 		while (shift)
 		{
 			sig = (*message & (1 << --shift)) != 0;
-			kill(serverid, sig ? SIGUSR1 : SIGUSR2);
-			usleep(200);
+			if (sig)
+				kill(serverid, SIGUSR1);
+			else
+				kill(serverid, SIGUSR2);
+			usleep(100);
 		}
 		message++;
+	}
+	shift = 8;
+	while (shift--)
+	{
+		kill(serverid, SIGUSR2);
+		usleep(100);
 	}
 }
 
@@ -57,12 +68,14 @@ int	main(int argc, char *argv[])
 	int		serverid;
 	char	*message;
 
+	signal(SIGUSR1, &handle_sig);
+	signal(SIGUSR2, &handle_sig);
 	if (argc != 3)
 	{
 		ft_printf("usage: client [serverid] [messsage]\n");
 		return (0);
 	}
-	serverid = ft_atoi((const char*) argv[1]);
+	serverid = ft_atoi((const char *) argv[1]);
 	message = argv[2];
 	send_message(serverid, message);
 	return (0);
