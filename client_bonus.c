@@ -6,7 +6,7 @@
 /*   By: sdukic <sdukic@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:39:39 by sdukic            #+#    #+#             */
-/*   Updated: 2022/11/13 23:06:43 by sdukic           ###   ########.fr       */
+/*   Updated: 2022/11/13 00:39:44 by sdukic           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,9 @@ int	g_ack;
 void	handle_sig(int signal)
 {
 	if (signal == SIGUSR1)
+	{
 		g_ack = 1;
+	}
 	else if (signal == SIGUSR2)
 		ft_printf("Message Received!\n");
 }

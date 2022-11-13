@@ -1,72 +1,40 @@
-OBJ_DIR = ./objs/
 
-NAME := minitalk
-SERVERSRCS := 	server.c
-CLIENTSRCS := 	client.c
-SERVEROBJFILES := $(SERVERSRCS:.c=.o)
-CLIENTOBJFILES := $(CLIENTSRCS:.c=.o)
-SERVEROBJ := $(addprefix $(OBJ_DIR), $(SERVEROBJFILES))
-CLIENTOBJ := $(addprefix $(OBJ_DIR), $(CLIENTOBJFILES))
+RM		= rm -f
+CFLAGS	= -Wall -Wextra -Werror
+OBJS_PATH	= ./objs/
+SERVER_O	= ${OBJS_PATH}server.o
+CLIENT_O	= ${OBJS_PATH}client.o
+SERVER_BONUS_O	= ${OBJS_PATH}server_bonus.o
+CLIENT_BONUS_O	= ${OBJS_PATH}client_bonus.o
 
-BONUS := bonus
-BONUS_SERVER_SRCS := server_bonus.c
-BONUS_CLIENT_SRCS := client_bonus.c
-BONUS_SERVEROBJFILES := $(BONUS_SERVER_SRCS:.c=.o)
-BONUS_CLIENTOBJFILES := $(BONUS_CLIENT_SRCS:.c=.o)
-BONUS_SERVEROBJ := $(addprefix $(OBJ_DIR), $(BONUS_SERVEROBJFILES))
-BONUS_CLIENTOBJ := $(addprefix $(OBJ_DIR), $(BONUS_CLIENTOBJFILES))
+all: lib server client
 
-SERVER := server
-CLIENT := client
-CC := cc
+${OBJS_PATH}%.o: %.c
+			@mkdir -p $(OBJS_PATH)
+			@cc ${CFLAGS} -c $< -o ${OBJS_PATH}${<:.c=.o}
 
-CFLAGS ?= -Wall -Wextra -Werror
-LIBFTDIR ?= ./libft
-LIBFT ?= $(LIBFTDIR)/libft.a
+client:	${CLIENT_O}
+			@cc ${CFLAGS} -o client ${CLIENT_O} -L libft -lft
 
-GREEN = \033[1;32m
-YEL = \033[1;33m
-EOL = \033[0m
-
-$(NAME): lib $(SERVER) $(CLIENT)
-
-$(OBJ_DIR)%.o: %.c
-	@mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(SERVER): $(SERVEROBJ)
-	@$(CC) $(CFLAGS) $(SERVEROBJ) $(LIBFT) -o $(SERVER)
-	@echo "\n$(GREEN) >> Server created.\n $(EOL)"
-
-$(CLIENT): $(CLIENTOBJ)
-	@$(CC) $(CFLAGS) $(CLIENTOBJ) $(LIBFT) -o $(CLIENT)
-	@echo "\n$(GREEN) >> Client created.\n $(EOL)"
-
-lib:
-	@make -C libft
-	@echo "\n$(YEL) >> LIBFT created. $(EOL)"
-
-bonus: $(BONUS_SERVEROBJ) $(BONUS_CLIENTOBJ)
-	@$(CC) $(CFLAGS) $(BONUS_SERVEROBJ) $(LIBFT) -o $(SERVER)
-	@$(CC) $(CFLAGS) $(BONUS_CLIENTOBJ) $(LIBFT) -o $(CLIENT)
-	@echo "\n$(GREEN) >> Bonus created.\n $(EOL)"
-
-all: $(NAME)
-	@make lib
+server:	${SERVER_O}
+			@cc ${CFLAGS} -o server ${SERVER_O} -L libft -lft
 
 clean:
-	@make clean -C libft
-	@rm -rf $(SERVEROBJ) $(CLIENTOBJ) $(BONUS_SERVEROBJ) $(BONUS_CLIENTOBJ)
-	@echo "\n$(YEL) >> clean executed. 🗑 \n $(EOL)"
+			@make clean -C libft
+			@rm -rf objs
 
-fclean:
-	@make fclean -C libft
-	@rm -rf $(SERVEROBJ) $(CLIENTOBJ) $(BONUS_SERVEROBJ) $(BONUS_CLIENTOBJ) $(SERVER) $(CLIENT)
-	@echo "\n$(YEL) >> fclean executed. 🗑 \n $(EOL)"
+fclean:		clean
+			@make fclean -C libft
+			@${RM} client server
+			@${RM} client_bonus server_bonus
 
-re:
-	@make fclean
-	@make all
+re:			fclean all
 
+bonus:		${SERVER_BONUS_O} ${CLIENT_BONUS_O} lib
+			@cc ${CFLAGS} -o server ${SERVER_BONUS_O} -L libft -lft
+			@cc ${CFLAGS} -o client ${CLIENT_BONUS_O} -L libft -lft
 
-.PHONY: clean fclean all re bonus
+lib:
+			@make -C libft
+
+.PHONY:		all clean fclean re bonus lib

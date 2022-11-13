@@ -22,22 +22,22 @@ RM		= rm -f
 CFLAGS	= -Wall -Wextra -Werror
 
 .c.o:
-			${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
+			@${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
 
 ${NAME}:	${OBJS}
-			ar -rcs ${NAME} ${OBJS}
+			@ar -rcs ${NAME} ${OBJS}
 
 all:		${NAME}
 
 clean:
-			${RM} ${OBJS} ${BONUS_O}
+			@${RM} ${OBJS} ${BONUS_O}
 
 fclean:		clean
-			${RM} ${NAME}
+			@${RM} ${NAME}
 
 re:			fclean all
 
 bonus:		${BONUS_O} ${OBJS}
-			ar -rcs ${NAME} ${BONUS_O} ${OBJS}
+			@ar -rcs ${NAME} ${BONUS_O} ${OBJS}
 
 .PHONY:		all clean fclean re bonus
